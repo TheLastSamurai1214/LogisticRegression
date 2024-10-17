@@ -1,0 +1,49 @@
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+
+# Datos
+datos = {
+    'Ingreso Mensual': [2000, 1500, 2000, 1500, 2000, 2000, 3500, 3200, 3500, 3200, 2000, 5000, 5000],
+    'Deuda Total': [500, 1000, 1000, 1200, 1000, 500, 2000, 1500, 1500, 2000, 1000, 2500, 5000],
+    'Default': [0, 1, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1]
+}
+
+# DataFrame
+df= pd.DataFrame(datos)
+
+# Separar las variables dependientes e independientes
+X = df[['Ingreso Mensual', 'Deuda Total']]  # Variables independientes
+y = df['Default']  # Variable dependiente
+
+# Dividir los datos en conjunto de entrenamiento y prueba
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=40)
+
+# Crear el modelo de regresión logística
+modelo = LogisticRegression(C=1)
+
+# Datos para predecir
+nuevos_datos = pd.DataFrame({
+    'Ingreso Mensual': [3200, 1500, 2800],  # Ejemplo de ingresos mensuales de nuevos clientes
+    'Deuda Total': [900, 1100, 1300]  # Ejemplo de deudas totales de los mismos clientes
+})
+
+# Hacer predicciones con probabilidades
+predicciones_prob = model.predict_proba(nuevos_datos)
+
+# Mostrar las probabilidades con sugerencias
+print("Resultados de las predicciones (en porcentajes):")
+for i, prob in enumerate(predicciones_prob):
+    prob_no_default = prob[0] * 100  # Probabilidad de No Default (clase 0)
+    prob_default = prob[1] * 100     # Probabilidad de Default (clase 1)
+    
+    # Sugerencia basada en la probabilidad
+    if prob_default > prob_no_default:
+        sugerencia = "lo que sugiere que el cliente tiene un alto riesgo de no pagar."
+    else:
+        sugerencia = "lo que sugiere que el cliente probablemente pagará."
+    
+    print(f'Cliente {i+1}: {prob_no_default:.2f}% No Default, {prob_default:.2f}% Default, {sugerencia}')
